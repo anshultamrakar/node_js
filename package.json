@@ -1,0 +1,18 @@
+{
+  "name": "dev_tinder_restart",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+   "start" : "nodemon src/app.js",
+   "dev" : "nodemon src/app.js"
+  },
+  "keywords": [
+    "node js"
+  ],
+  "author": "anshul",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
