@@ -1,21 +1,20 @@
 const adminAuth = (req, res , next) => {
-  const token = "xyz"
-  const isAuthorised = token === "xyz"
-  if(!isAuthorised){
-    res.status(401).send("Unauthorise Token")
-  }else{
+   const token = "xyz"
+   const isAuthorised  = token === "xyz"
+   if(!isAuthorised){
+    res.status(401).send("admin not authorised")
+   }else{
     next()
-  }
+   }
 }
-
 
 const userAuth = (req, res, next) => {
     const token = "xyz"
-    const isAuthorised = token === "xyz"
+    const isAuthorised  = token === "xyz"
     if(!isAuthorised){
-      res.status(401).send("Unauthorise Token")
+     res.status(401).send("admin not authorised")
     }else{
-      next()
+     next()
     }
 }
 
