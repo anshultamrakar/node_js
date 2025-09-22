@@ -1,30 +1,41 @@
 const express = require("express")
-
+const connectDB = require("./config/database")
 const app = express()
-const {adminAuth , userAuth}= require("./middlewear/auth")
 
-app.use("/admin" , adminAuth)
+const User = require("./models/users")
 
-app.use("/user" , userAuth)
 
-app.get("/admin/getAllUser" , (req, res) => {
-  res.send("All admin Data")
-})
-
-app.get("/user/getAllUser" , (req, res) => {
-  try{
-   res.send("All user Data")
-  }catch(error){
-    res.status(500).send(error)
+app.post("/signup", async (req, res) => {
+  try {
+    const user = new User({
+      firsName: "Divyansh",
+      lastName: "Tamrakar",
+      email: "divyansh@belgiumwebnet.com",
+      age: 25,
+    });
+    await user.save();
+    res.send("User save succesfully")
+  } catch (err) {
+    res.status(401).send("Error" + err.message);
   }
-  
-})
-
-app.delete("/admin/deleteUser", (req, res) => {
-   res.send("Delete All the users")
-})
+});
 
 
-app.listen(7777 , () => {
-    console.log("Server start running on port")
-})
+
+
+
+connectDB()
+  .then(() => {
+    console.log("Database connection established");
+    app.listen(7777, () => {
+      console.log("Server start running on port");
+    });
+  })
+  .catch((err) => {
+    console.log("Databse is facing issue while connecting");
+  });
+
+
+
+
+
