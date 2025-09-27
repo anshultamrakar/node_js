@@ -4,32 +4,28 @@ const app = express()
 const User = require("./models/users")
 
 app.use(express.json()) //middlewear to read the json data
-
 app.post("/signup", async (req, res) => {
   try {
     const user = new User(req.body);
-    await user.save();
+     await user.save();
     res.send("User save succesfully")
   } catch (err) {
     res.status(401).send("Error" + err.message);
   }
 });
-
 app.get("/user" , async(req, res) => {
-  const userEmail = req.body.email
+  const userEmail = req.body.emailId
   try{
-   const user = await User.find({email : userEmail})
+   const user = await User.find({emailId : userEmail})
    if(!user){
-    res.status(404).send("user not found")
+    res.status(404).send("User not found")
    }else{
    res.send(user)
    }
-   res.send(``)
   }catch(err){
     res.status(401).send("User not found")
   }
 })
-
 app.get("/feed" , async(req, res) => {
   try{
    const users = await User.find({})
@@ -42,7 +38,15 @@ app.get("/feed" , async(req, res) => {
     res.status(401).send("Something went wrong")
   }
 })
-
+app.delete("/user" , async(req, res)=> {
+  const userId = req.body.userId
+  try{
+   const user = await User.findByIdAndDelete({ _id : userId})
+   res.send("User Deleted Succesfully")
+  }catch(err){
+   res.status(401).send("Something went wrong")
+  }
+})
 connectDB()
   .then(() => {
     console.log("Database connection established");
