@@ -4,15 +4,20 @@ const app = express()
 const User = require("./models/users")
 
 app.use(express.json()) //middlewear to read the json data
+
 app.post("/signup", async (req, res) => {
   try {
     const user = new User(req.body);
      await user.save();
+     if(req.body.skills.length > 10){
+      throw new Error(" Skills cannot be more than 10")
+    }
     res.send("User save succesfully")
   } catch (err) {
     res.status(401).send("Error" + err.message);
   }
 });
+
 app.get("/user" , async(req, res) => {
   const userEmail = req.body.emailId
   try{
@@ -26,6 +31,7 @@ app.get("/user" , async(req, res) => {
     res.status(401).send("User not found")
   }
 })
+
 app.get("/feed" , async(req, res) => {
   try{
    const users = await User.find({})
@@ -38,6 +44,7 @@ app.get("/feed" , async(req, res) => {
     res.status(401).send("Something went wrong")
   }
 })
+
 app.delete("/user" , async(req, res)=> {
   const userId = req.body.userId
   try{
@@ -52,7 +59,8 @@ app.patch("/user" , async(req, res) => {
   const userId = req.body.userId
   const data = req.body
    try{
-    const user = await User.findByIdAndUpdate({_id : userId} , data , {returnDocument : "after"})
+    await User.findByIdAndUpdate({_id : userId} , data , {returnDocument : "after"})
+    
     res.send("Update succesfully")
    }catch(err){
     res.status(401).send("Upada Failed" + err.message)
