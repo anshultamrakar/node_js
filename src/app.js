@@ -4,15 +4,18 @@ const app = express()
 const User = require("./models/users")
 const {validationSignUp} = require("./utils/validation")
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken');
 
 app.use(express.json()) //middlewear to read the json data
+app.use(cookieParser())
 
 app.post("/signup", async (req, res) => {
   try {
     // validationSignUp(req);
      const {firstName,lastName,emailId,password} = req.body
      const passwordHash = await bcrypt.hash(password , 10)
-    const user = new User({
+     const user = new User({
       firstName,
       lastName,
       emailId,
@@ -25,21 +28,45 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login" , async(req, res) => {
-  const {emailId, password} = req.body
-  try{
-  const user = await User.findOne({emailId :emailId })
-  if(!user){
-    throw new Error("Invalid Credentials")
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+  try {
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      const token = await jwt.sign({_id : user._id}, "DevTinder@123#")
+      res.cookie("token" , token)
+      res.send("User login succesfully!");
+    } else {
+      throw new Error("Invalid Credentials");
+    }
+  } catch (err) {
+    res.status(401).send("Error " + err.message);
   }
-  const isPasswordValid = bcrypt.compare(password , user.password)
-  if(!isPasswordValid){
-    throw new Error("Invalid Credentials")
+});
+
+
+app.get("/profile" , async(req, res) => {
+  try{
+  const cookies =  req.cookies
+  const {token} = cookies
+  if(!token){
+    throw new Error("Invalid Token!")
+  }
+  const decodeMessage  = await jwt.verify(token , "DevTinder@123#")
+  const {_id} = decodeMessage
+  const user = await User.findById({_id})
+  if(user){
+  res.send(user)
   }else{
-    res.send("User login succesfully!")
+    throw new Error("User Does not exist!")
   }
   }catch(err){
-    res.status(401).send("Error " + err.message)
+    res.status(401).send("Error " + err.messsage)
   }
 })
 
@@ -85,7 +112,6 @@ app.patch("/user" , async(req, res) => {
   const data = req.body
    try{
     await User.findByIdAndUpdate({_id : userId} , data , {returnDocument : "after"})
-    
     res.send("Update succesfully")
    }catch(err){
     res.status(401).send("Upada Failed" + err.message)
