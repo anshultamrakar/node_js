@@ -5,7 +5,9 @@ const User = require("./models/users")
 const {validationSignUp} = require("./utils/validation")
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser')
+const {userAuth} = require("./middlewear/auth")
 const jwt = require('jsonwebtoken');
+
 
 app.use(express.json()) //middlewear to read the json data
 app.use(cookieParser())
@@ -28,7 +30,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login" ,  async(req, res) => {
   const { emailId, password } = req.body;
   try {
     const user = await User.findOne({ emailId: emailId });
@@ -50,21 +52,10 @@ app.post("/login", async (req, res) => {
 });
 
 
-app.get("/profile" , async(req, res) => {
+app.get("/profile" , userAuth , (req, res) => {
   try{
-  const cookies =  req.cookies
-  const {token} = cookies
-  if(!token){
-    throw new Error("Invalid Token!")
-  }
-  const decodeMessage  = await jwt.verify(token , "DevTinder@123#")
-  const {_id} = decodeMessage
-  const user = await User.findById({_id})
-  if(user){
+  const user = req.user
   res.send(user)
-  }else{
-    throw new Error("User Does not exist!")
-  }
   }catch(err){
     res.status(401).send("Error " + err.messsage)
   }
